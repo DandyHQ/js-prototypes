@@ -23,6 +23,22 @@ Scroller = function(element) {
     };
   var oldY = 0;
 
+  //---- INITIALISE ----
+
+  //---- METHODS ----
+
+  function resize() {
+    var minimum = 20;
+
+    var trackHeight = 476;
+    var windowHeight = 480;
+    var contentHeight = input.scrollHeight();
+
+    var newHeight = trackHeight * (windowHeight / contentHeight);
+    element.css('height', newHeight);
+  }
+  this.resize = resize;
+
   function mouseOver(event) {
     if (!isDown)
       element.css('background-color', '#535859');
@@ -44,6 +60,8 @@ Scroller = function(element) {
       mouseOver();
     else
       mouseOut();
+
+    $('body').css('user-select', '');
   }
   this.mouseUp = mouseUp;
 
@@ -54,6 +72,8 @@ Scroller = function(element) {
 
     element.css('background-color', '#2a76c6');
     isDown = true;
+
+    $('body').css('user-select', 'none');
   }
 
   function mouseMove(event) {
@@ -77,6 +97,8 @@ Scroller = function(element) {
   }
   this.mouseMove = mouseMove;
 
+  //---- EVENTS ----
+
   element.hover(mouseOver, mouseOut);
   element.mousedown(mouseDown);
 }
@@ -87,6 +109,12 @@ Input = function(element) {
 
   var scroller = new Scroller(element.find('.scroller'));
 
+  //---- INITIALISE ----
+
+  setTimeout(scroller.resize, 0);
+
+  //---- METHODS ----
+
   function getValue(){
     return input.text();
   }
@@ -94,8 +122,16 @@ Input = function(element) {
 
   function setValue(value){
     input.text(value);
+    scroller.resize();
   }
   this.setValue = setValue;
+
+  function scrollHeight(){
+    return input[0].scrollHeight;
+  }
+  this.scrollHeight = scrollHeight;
+
+  //---- EVENTS ----
 
   $(document).mouseup(scroller.mouseUp);
   $(document).mousemove(scroller.mouseMove);
@@ -104,6 +140,10 @@ Input = function(element) {
 
 Buttons = function(element) {
   var element = $(element);
+
+  //---- INITIALISE ----
+
+  //---- METHODS ----
 
   /**
    * Drops either a paragraph or a set number of chars from text.
@@ -136,6 +176,8 @@ Buttons = function(element) {
     text = dropParagraph(text);
     input.setValue(text);
   }
+
+  //---- EVENTS ----
 
   element.find('.more-text').click(addText);
   element.find('.less-text').click(delText);
