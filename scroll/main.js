@@ -1,3 +1,15 @@
+var ipsum = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus nibh nisi, sollicitudin vel magna eget, sagittis semper elit. Vestibulum maximus ullamcorper purus id vehicula. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. Duis rutrum enim sit amet erat gravida, et cursus arcu suscipit. Quisque laoreet lectus sed ex ornare dictum. Donec lacinia felis ac iaculis gravida. Sed in laoreet dolor. Fusce in ipsum vel augue auctor gravida. Cras nec faucibus risus. Proin elementum purus ut congue suscipit. Integer volutpat turpis velit, eget fermentum diam malesuada nec.";
+
+/**
+ * Checks whether a string only contains whitespace characters.
+ * Empty strings return true
+ */
+function isWhitespace(text) {
+  return /^\s*$/.test(text);
+}
+
+/** Holds the reference to the one input object. */
+var input;
 
 Scroller = function(element) {
   var element = $(element);
@@ -69,9 +81,70 @@ Scroller = function(element) {
   element.mousedown(mouseDown);
 }
 
+Input = function(element) {
+  var element = $(element);
+  var input = element.find('textarea');
 
-function init() {
-  var scroller = new Scroller($('.scroller'));
+  var scroller = new Scroller(element.find('.scroller'));
+
+  function getValue(){
+    return input.text();
+  }
+  this.getValue = getValue;
+
+  function setValue(value){
+    input.text(value);
+  }
+  this.setValue = setValue;
+
   $(document).mouseup(scroller.mouseUp);
   $(document).mousemove(scroller.mouseMove);
+}
+
+
+Buttons = function(element) {
+  var element = $(element);
+
+  /**
+   * Drops either a paragraph or a set number of chars from text.
+   *
+   * NB This function is pure.
+   */
+  function dropParagraph(text){
+    var split = text.split('\n');
+    for (var i = split.length - 1; i >= 0; i--) {
+      if (!isWhitespace(split[i]) && typeof split[i-1] !== 'undefined' && isWhitespace(split[i-1])) {
+        split = split.slice(0, i-1);
+        break;
+      }
+    }
+    var joint = split.join('\n');
+    if (joint == text) {
+      joint = joint.slice(0, -500);
+    }
+    return joint;
+  }
+
+  function addText(){
+    var text = input.getValue();
+    text += '\n\n' + ipsum;
+    input.setValue(text);
+  }
+
+  function delText(){
+    var text = input.getValue();
+    text = dropParagraph(text);
+    input.setValue(text);
+  }
+
+  element.find('.more-text').click(addText);
+  element.find('.less-text').click(delText);
+}
+
+
+
+
+function init() {
+  input = new Input($('.input'));
+  new Buttons($('.text-control-buttons'));
 }
