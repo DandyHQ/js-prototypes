@@ -94,8 +94,31 @@ Scroller = function(element) {
       newY = 480 - element.outerHeight() - 2;
 
     element.css('margin-top', newY + 'px');
+
+    var scrollPercent = newY / (480 - element.outerHeight() - 4);
+    input.scroll(scrollPercent);
   }
   this.mouseMove = mouseMove;
+
+  /**
+   * Position the scrollbar such that it remains in sync with the document.
+   */
+  function scroll(percent) {
+    if (isDown)
+      return;
+
+    var newY = percent * (480 - element.outerHeight() - 4);
+
+    // past the top
+    if (newY < 0 + 2)
+      newY = 0 + 2;
+    // past the bottom
+    if (newY + element.outerHeight() + 2 > 480)
+      newY = 480 - element.outerHeight() - 2;
+
+    element.css('margin-top', newY + 'px');
+  }
+  this.scroll = scroll;
 
   //---- EVENTS ----
 
@@ -115,26 +138,55 @@ Input = function(element) {
 
   //---- METHODS ----
 
-  function getValue(){
+  /**
+   * Return the document text.
+   */
+  function getValue() {
     return input.text();
   }
   this.getValue = getValue;
 
-  function setValue(value){
+  /**
+   * Set the document text.
+   */
+  function setValue(value) {
     input.text(value);
     scroller.resize();
   }
   this.setValue = setValue;
 
-  function scrollHeight(){
+  /**
+   * Get the height of the scrollable document.
+   */
+  function scrollHeight() {
     return input[0].scrollHeight;
   }
   this.scrollHeight = scrollHeight;
+
+  /**
+   * Set the scroll position. Takes a float in the range 0-1.
+   */
+  function scroll(percent) {
+    var scroll = percent * (scrollHeight() - 480);
+    if (percent * 100 < 1)
+      scroll = 0;
+    input[0].scrollTop = scroll;
+  }
+  this.scroll = scroll;
+
+  /**
+   * Called when the input is scrolling. Send this message to our custom scrollbar.
+   */
+  function scrolling() {
+    var scrollPercent = input[0].scrollTop / (scrollHeight() - 480);
+    scroller.scroll(scrollPercent);
+  }
 
   //---- EVENTS ----
 
   $(document).mouseup(scroller.mouseUp);
   $(document).mousemove(scroller.mouseMove);
+  input.scroll(scrolling);
 }
 
 
